@@ -164,28 +164,58 @@ function NavBar() {
   const [scr,setScr]=useState(false); const [act,setAct]=useState("Home");
   const [ind,setInd]=useState({}); const lrefs=useRef({});
   const [flash,setFlash]=useState(null); const tid=useRef([]);
-  useEffect(()=>{ const h=()=>setScr(window.scrollY>50); window.addEventListener("scroll",h); return()=>window.removeEventListener("scroll",h); },[]);
-  useEffect(()=>{ const el=lrefs.current[act]; if(el){ const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect(); setInd({left:r.left-p.left,width:r.width}); } },[act]);
+  const scrollLock=useRef(false);
+
+  /* glass nav on scroll */
+  useEffect(()=>{ const h=()=>setScr(window.scrollY>50); window.addEventListener("scroll",h,{passive:true}); return()=>window.removeEventListener("scroll",h); },[]);
+
+  /* slide indicator when active changes */
+  useEffect(()=>{ const el=lrefs.current[act]; if(el){ const r=el.getBoundingClientRect(),p=el.parentElement?.getBoundingClientRect(); if(p) setInd({left:r.left-p.left,width:r.width}); } },[act]);
+
+  /* auto-highlight active section on scroll */
+  useEffect(()=>{
+    const track=()=>{
+      if(scrollLock.current) return;
+      const midY=window.scrollY + window.innerHeight * 0.45;
+      let current=NAV[0];
+      NAV.forEach(n=>{
+        const el=document.getElementById(n.toLowerCase());
+        if(el && el.offsetTop <= midY) current=n;
+      });
+      setAct(current);
+    };
+    window.addEventListener("scroll",track,{passive:true});
+    track();
+    return()=>window.removeEventListener("scroll",track);
+  },[]);
+
+  /* cleanup timeouts */
   useEffect(()=>()=>tid.current.forEach(clearTimeout),[]);
+
   const handleNav=(e,n)=>{
     e.preventDefault();
     const b=e.currentTarget.getBoundingClientRect();
     const x=b.left+b.width/2, y=b.top+b.height/2;
     setAct(n); setFlash({x,y,out:false});
+    scrollLock.current=true;
     tid.current.push(setTimeout(()=>{
       const el=document.getElementById(n.toLowerCase());
       if(el) window.scrollTo({top:Math.max(0,el.offsetTop-66),behavior:"instant"});
       setFlash(f=>f?{...f,out:true}:null);
     },330));
-    tid.current.push(setTimeout(()=>setFlash(null),680));
+    tid.current.push(setTimeout(()=>{
+      setFlash(null);
+      scrollLock.current=false;
+    },750));
   };
+
   return (
     <>
       {flash && <NavFlash x={flash.x} y={flash.y} out={flash.out}/>}
       <nav className={`nav${scr?" nav-glass":""}`}>
         <span className="logo">H<span>ilal.</span></span>
         <div className="nav-links" style={{position:"relative"}}>
-          <div className="nav-ind" style={{...ind,transition:"left .3s,width .3s"}}/>
+          <div className="nav-ind" style={{...ind,transition:"left .35s cubic-bezier(.22,1,.36,1),width .35s cubic-bezier(.22,1,.36,1)"}}/>
           {NAV.map(n=><a key={n} href={`#${n.toLowerCase()}`} ref={el=>lrefs.current[n]=el} onClick={e=>handleNav(e,n)} className={`nl${act===n?" nl-a":""}`} data-h>{n}</a>)}
         </div>
         <Mag href={GH} target="_blank" rel="noreferrer" className="gh-btn">GitHub ↗</Mag>
