@@ -176,7 +176,7 @@ function Hero() {
         {/* <div className="badge"><span className="bdot"/>Available for Work</div> */}
         <h1 ref={h1} className="hname">
           <span className="cr" style={{animationDelay:".1s"}}>Hilal</span>
-          <span className="cr acc" style={{animationDelay:".25s"}}>Ahammed PP</span>
+          <span className="cr acc" style={{animationDelay:".25s"}}>Ahamed PP</span>
         </h1>
         <div className="htyped">{typed}<span className="cblink"/></div>
         <p className="hdesc cr" style={{animationDelay:".4s"}}>Building secure, scalable full-stack web apps<br/>with clean code & great user experiences.</p>
@@ -299,7 +299,7 @@ function Contact() {
 
 /* ───── FOOTER ───── */
 function Footer() {
-  return <footer className="foot">Built by <strong>Hilal Ahammed PP</strong> · MERN Stack Developer · Kozhikode, Kerala</footer>;
+  return <footer className="foot">Built by <strong>Hilal Ahamed PP</strong> · MERN Stack Developer · Kozhikode, Kerala</footer>;
 }
 
 /* ───── APP ───── */
@@ -307,7 +307,7 @@ export default function App() {
   const [loaded,setLoaded]=useState(false);
   useEffect(()=>{
     const l=document.createElement("link"); l.href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"; l.rel="stylesheet"; document.head.appendChild(l);
-    document.title="Hilal Ahammed PP — MERN Stack Developer";
+    document.title="Hilal Ahamed PP — MERN Stack Developer";
   },[]);
   return (
     <>
