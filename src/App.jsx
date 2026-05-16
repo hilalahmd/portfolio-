@@ -173,7 +173,7 @@ function Hero() {
     <section id="home" className="hero" ref={ref}>
       <Particles/>
       <div className={`hc${vis?" hc-in":""}`}>
-        <div className="badge"><span className="bdot"/>Available for Work</div>
+        {/* <div className="badge"><span className="bdot"/>Available for Work</div> */}
         <h1 ref={h1} className="hname">
           <span className="cr" style={{animationDelay:".1s"}}>Hilal</span>
           <span className="cr acc" style={{animationDelay:".25s"}}>Ahammed PP</span>
