@@ -65,10 +65,20 @@ function useCounter(end,go,dur=1400) {
   return v;
 }
 
-function useReveal(th=0.15) {
-  const ref=useRef(null); const [v,setV]=useState(false);
-  useEffect(()=>{ const o=new IntersectionObserver(([e])=>{ if(e.isIntersecting){setV(true);o.disconnect();} },{threshold:th}); if(ref.current)o.observe(ref.current); return()=>o.disconnect(); },[th]);
-  return [ref,v];
+function useReveal(th=0.05) {
+  const ref=useRef(null); const [v,setV]=useState(false); const [fl,setFl]=useState(false);
+  const dir=useRef('down'); const lastY=useRef(typeof window!=='undefined'?window.scrollY:0);
+  useEffect(()=>{
+    const onScroll=()=>{ const y=window.scrollY; if(Math.abs(y-lastY.current)>3){dir.current=y<lastY.current?'up':'down'; lastY.current=y;} };
+    window.addEventListener('scroll',onScroll,{passive:true});
+    const o=new IntersectionObserver(([e])=>{
+      if(e.isIntersecting){ const up=dir.current==='up'; setFl(up); requestAnimationFrame(()=>setV(true)); }
+      else{ setV(false); setFl(dir.current==='down'); }
+    },{threshold:th, rootMargin:'0px 0px -60px 0px'});
+    if(ref.current)o.observe(ref.current);
+    return()=>{o.disconnect();window.removeEventListener('scroll',onScroll);};
+  },[th]);
+  return [ref,v,fl];
 }
 
 /* ───── CURSOR ───── */
@@ -143,22 +153,44 @@ function Mag({href,children,className,target,rel}) {
   return <a ref={r} href={href} className={className} target={target} rel={rel} onMouseMove={mv} onMouseLeave={lv} data-h>{children}</a>;
 }
 
+/* ───── NAV FLASH ───── */
+function NavFlash({x,y,out}) {
+  return <div className={`nf${out?" nf-out":""}`} style={{"--fx":`${x}px`,"--fy":`${y}px`}}/>;
+}
+
 /* ───── NAVBAR ───── */
 const NAV=["Home","About","Skills","Projects","Experience","Contact"];
 function NavBar() {
   const [scr,setScr]=useState(false); const [act,setAct]=useState("Home");
   const [ind,setInd]=useState({}); const lrefs=useRef({});
+  const [flash,setFlash]=useState(null); const tid=useRef([]);
   useEffect(()=>{ const h=()=>setScr(window.scrollY>50); window.addEventListener("scroll",h); return()=>window.removeEventListener("scroll",h); },[]);
   useEffect(()=>{ const el=lrefs.current[act]; if(el){ const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect(); setInd({left:r.left-p.left,width:r.width}); } },[act]);
+  useEffect(()=>()=>tid.current.forEach(clearTimeout),[]);
+  const handleNav=(e,n)=>{
+    e.preventDefault();
+    const b=e.currentTarget.getBoundingClientRect();
+    const x=b.left+b.width/2, y=b.top+b.height/2;
+    setAct(n); setFlash({x,y,out:false});
+    tid.current.push(setTimeout(()=>{
+      const el=document.getElementById(n.toLowerCase());
+      if(el) window.scrollTo({top:Math.max(0,el.offsetTop-66),behavior:"instant"});
+      setFlash(f=>f?{...f,out:true}:null);
+    },330));
+    tid.current.push(setTimeout(()=>setFlash(null),680));
+  };
   return (
-    <nav className={`nav${scr?" nav-glass":""}`}>
-      <span className="logo">H<span>ilal.</span></span>
-      <div className="nav-links" style={{position:"relative"}}>
-        <div className="nav-ind" style={{...ind,transition:"left .3s,width .3s"}}/>
-        {NAV.map(n=><a key={n} href={`#${n.toLowerCase()}`} ref={el=>lrefs.current[n]=el} onClick={()=>setAct(n)} className={`nl${act===n?" nl-a":""}`} data-h>{n}</a>)}
-      </div>
-      <Mag href={GH} target="_blank" rel="noreferrer" className="gh-btn">GitHub ↗</Mag>
-    </nav>
+    <>
+      {flash && <NavFlash x={flash.x} y={flash.y} out={flash.out}/>}
+      <nav className={`nav${scr?" nav-glass":""}`}>
+        <span className="logo">H<span>ilal.</span></span>
+        <div className="nav-links" style={{position:"relative"}}>
+          <div className="nav-ind" style={{...ind,transition:"left .3s,width .3s"}}/>
+          {NAV.map(n=><a key={n} href={`#${n.toLowerCase()}`} ref={el=>lrefs.current[n]=el} onClick={e=>handleNav(e,n)} className={`nl${act===n?" nl-a":""}`} data-h>{n}</a>)}
+        </div>
+        <Mag href={GH} target="_blank" rel="noreferrer" className="gh-btn">GitHub ↗</Mag>
+      </nav>
+    </>
   );
 }
 
@@ -196,17 +228,17 @@ function Hero() {
 
 /* ───── SECTION TITLE ───── */
 function ST({text}) {
-  const [ref,v]=useReveal(); const out=useScramble(text,v);
-  return <div className="st" ref={ref}><h2 className={`sh${v?" sv2":""}`}>{out}</h2><div className={`sl2${v?" sv2":""}`}/></div>;
+  const [ref,v,fl]=useReveal(); const out=useScramble(text,v);
+  return <div className="st" ref={ref}><h2 className={`sh${v?" sv2":fl?" sh-left":""}`}>{out}</h2><div className={`sl2${v?" sv2":""}`}/></div>;
 }
 
 /* ───── ABOUT ───── */
 function About() {
-  const [ref,v]=useReveal();
+  const [ref,v,fl]=useReveal();
   return (
     <section id="about" className="sec" ref={ref}>
       <ST text="ABOUT ME"/>
-      <div className={`ag${v?" ag-in":""}`}>
+      <div className={`ag${v?" ag-in":fl?" ag-left":""}`}>
         <div className="atxt">
           <p>I'm a <em>Full Stack MERN Developer</em> from Kozhikode, Kerala, passionate about building production-grade web apps.</p>
           <p>Currently interning at <em>Bridgeon Solution</em> — building scalable REST APIs, responsive React UIs, and secure backend systems daily.</p>
@@ -224,13 +256,13 @@ function About() {
 
 /* ───── SKILLS ───── */
 function Skills() {
-  const [ref,v]=useReveal();
+  const [ref,v,fl]=useReveal();
   return (
     <section id="skills" className="sec" ref={ref}>
       <ST text="TECHNICAL SKILLS"/>
       <div className="sgrid">
         {Object.entries(SKILLS).map(([cat,list],ci)=>(
-          <Tilt key={cat} className="scard" style={{animationDelay:`${ci*.08}s`}}>
+          <Tilt key={cat} className={`scard${v?" scard-in":fl?" scard-left":""}`} style={{transitionDelay:`${ci*0.07}s`}}>
             <div className="scat">{cat}</div>
             <div className="stags">{list.map(s=><span key={s} className="stag" data-h>{s}</span>)}</div>
           </Tilt>
@@ -242,12 +274,12 @@ function Skills() {
 
 /* ───── PROJECTS ───── */
 function Projects() {
-  const [ref,v]=useReveal();
+  const [ref,v,fl]=useReveal();
   return (
     <section id="projects" className="sec" ref={ref}>
       <ST text="PROJECTS"/>
       {PROJECTS.map(p=>(
-        <Tilt key={p.name} className={`pcard${v?" pcard-in":""}`}>
+        <Tilt key={p.name} className={`pcard${v?" pcard-in":fl?" pcard-left":""}`}>
           <div className="pglow"/>
           <div className="ph">
             <div><h3 className="pname">{p.name}</h3><p className="psub">{p.sub}</p></div>
@@ -264,12 +296,12 @@ function Projects() {
 
 /* ───── EXPERIENCE ───── */
 function Experience() {
-  const [ref,v]=useReveal();
+  const [ref,v,fl]=useReveal();
   return (
     <section id="experience" className="sec" ref={ref}>
       <ST text="EXPERIENCE"/>
       {EXP.map(e=>(
-        <div key={e.company} className={`ecard${v?" ecard-in":""}`}>
+        <div key={e.company} className={`ecard${v?" ecard-in":fl?" ecard-left":""}`}>
           <div className="eh"><div><h3 className="er">{e.role}</h3><p className="ec">{e.company}</p></div><span className="ep">{e.period}</span></div>
           <ul className="elist">{e.points.map((pt,i)=><li key={i}>{pt}</li>)}</ul>
         </div>
@@ -280,11 +312,11 @@ function Experience() {
 
 /* ───── CONTACT ───── */
 function Contact() {
-  const [ref,v]=useReveal();
+  const [ref,v,fl]=useReveal();
   return (
     <section id="contact" className="sec" ref={ref}>
       <ST text="LET'S CONNECT"/>
-      <div className={`cbox${v?" cbox-in":""}`}>
+      <div className={`cbox${v?" cbox-in":fl?" cbox-left":""}`}>
         <p className="csub">I'm actively looking for developer roles. Reach out anytime!</p>
         <div className="clinks">
           {[{l:"Email",v:CONTACT.email,h:`mailto:${CONTACT.email}`},{l:"Phone",v:CONTACT.phone,h:`tel:${CONTACT.phone}`},{l:"GitHub",v:"github.com/hilalahmd",h:GH},{l:"LinkedIn",v:"linkedin.com/in/hilal",h:CONTACT.linkedin}].map(c=>(
@@ -311,7 +343,6 @@ export default function App() {
   },[]);
   return (
     <>
-      <Cursor/>
       {!loaded && <Loader done={()=>setLoaded(true)}/>}
       <div className={`page${loaded?" page-in":""}`}>
         <NavBar/>
