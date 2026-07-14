@@ -4,32 +4,44 @@ import "./App.css";
 /* ───── DATA ───── */
 const GH = "https://github.com/hilalahmd";
 const SKILLS = {
-  Frontend: ["React.js","Redux","HTML5","CSS3","Tailwind CSS","JavaScript ES6+"],
-  Backend:  ["Node.js","Express.js","RESTful API","MVC Architecture"],
-  Database: ["MongoDB","Mongoose"],
-  Security: ["JWT Auth","HttpOnly Cookies","bcrypt","Rate Limiting"],
-  Tools:    ["Git","GitHub","Postman","Axios","Stripe"],
+  Frontend: ["React.js","Redux Toolkit","Context API","Tailwind CSS","Bootstrap","HTML5","CSS3"],
+  Backend:  ["Node.js","Express.js","REST APIs","MVC","Socket.io","WebRTC"],
+  Database: ["MongoDB","Mongoose","Aggregation Pipelines"],
+  AI:       ["Gemini API","Stability AI","Custom RAG Pipeline"],
+  Security: ["JWT","HttpOnly Cookies","bcrypt","RBAC","Rate Limiting"],
+  Tools:    ["Git","GitHub","Vercel","Render","Cloudinary","Multer","Postman"],
 };
 const PROJECTS = [{
+  name:"FitForge", sub:"AI Health & Fitness Platform",
+  desc:"AI platform connecting clients and trainers with real-time video coaching, Gemini AI food analysis, and RAG chatbot.",
+  tech:["React.js","Node.js","Express.js","MongoDB","Socket.io","WebRTC","Gemini API","Cloudinary"],
+  highlights:["Gemini AI Auto-Estimation","WebRTC Video Coaching","Custom RAG Assistant","Role-Based Access Control"],
+  github: "https://github.com/hilalahmd/Single-Project-",
+}, {
   name:"Audibox", sub:"Full Stack E-Commerce Platform",
-  desc:"Production-grade e-commerce platform with product listings, cart management, order processing, secure auth, and Stripe payment integration.",
-  tech:["React.js","Node.js","Express.js","MongoDB","JWT","Tailwind CSS","Stripe","Redux"],
-  highlights:["JWT + HttpOnly Cookie Auth","Stripe Payment Integration","MVC Architecture","Responsive UI"],
+  desc:"High-performance e-commerce platform with product catalog, cart management, and dual payment gateways.",
+  tech:["React.js","Node.js","Express.js","MongoDB","JWT","Tailwind CSS","Stripe","Razorpay"],
+  highlights:["JWT + HttpOnly Cookie Auth","Stripe & Razorpay Integration","Multer + Cloudinary Pipeline","MVC Architecture"],
+  github: GH,
+  link: "https://audibox-e-commerce-erlk.vercel.app",
+}, {
+  name:"HabitFlow", sub:"Habit Tracking & Productivity App",
+  desc:"A gamified habit-tracking application designed to help users build consistent routines through visual streaks and progress analytics.",
+  tech:["React.js","Node.js","Express.js","MongoDB","Tailwind CSS"],
+  highlights:["User Authentication","Gamification System","Progress Analytics","Responsive UI"],
   github: GH,
 }];
 const EXP = [{
-  role:"MERN Stack Developer Intern", company:"Bridgeon Solution", period:"Aug 2025 – Present",
+  role:"MERN Stack Developer", company:"Bridgeon Solution", period:"Aug 2025 – Present",
   points:[
-    "Built full-stack features using React.js, Node.js, Express.js with scalable REST APIs",
-    "Engineered secure backend services with MVC architecture",
-    "Built responsive UIs with React.js and Tailwind CSS using reusable components",
-    "Implemented JWT auth, HttpOnly Cookies, bcrypt and rate limiting for security",
-    "Managed data with MongoDB and Mongoose for efficient CRUD operations",
-    "Collaborated via Git and GitHub for version control",
+    "Developed and deployed full-stack web application features using React.js, Node.js, and Express.js",
+    "Engineered secure backend services with MVC architecture, JWT auth, HttpOnly cookies, bcrypt hashing, and rate limiting",
+    "Built responsive, mobile-first frontend interfaces using React.js, Redux Toolkit, Tailwind CSS, and Bootstrap",
+    "Integrated Cloudinary for cloud-based media storage and Multer for server-side file upload handling",
   ],
 }];
 const CONTACT = {
-  email:"hilal.dev12@gmail.com", phone:"+91 8075992977",
+  email:"hilaljr970@gmail.com", phone:"+91 8075599297",
   location:"Kozhikode, Kerala, India", github: GH,
   linkedin:"https://linkedin.com/in/hilal-ahamed-pp-38433137a",
 };
@@ -247,9 +259,9 @@ function Hero() {
           <Mag href="#contact" className="btn-g">Let's Talk</Mag>
         </div>
         <div className="hstats cr" style={{animationDelay:".7s"}}>
-          <StatC end={1} suf="+" label="Projects" go={vis}/>
-          <StatC end={12} suf="+" label="Technologies" go={vis}/>
-          <StatC end={9} suf="+" label="Months Exp" go={vis}/>
+          <StatC end={3} suf="+" label="Projects" go={vis}/>
+          <StatC end={30} suf="+" label="Technologies" go={vis}/>
+          <StatC end={11} suf="+" label="Months Exp" go={vis}/>
         </div>
       </div>
     </section>
@@ -313,7 +325,10 @@ function Projects() {
           <div className="pglow"/>
           <div className="ph">
             <div><h3 className="pname">{p.name}</h3><p className="psub">{p.sub}</p></div>
-            <Mag href={p.github} target="_blank" rel="noreferrer" className="btn-g btn-sm">GitHub ↗</Mag>
+            <div style={{display:"flex", gap:"8px"}}>
+              {p.github && <Mag href={p.github} target="_blank" rel="noreferrer" className="btn-g btn-sm">GitHub ↗</Mag>}
+              {p.link && <Mag href={p.link} target="_blank" rel="noreferrer" className="btn-p btn-sm" style={{padding:"6px 12px",fontSize:"13px"}}>Live Demo ↗</Mag>}
+            </div>
           </div>
           <p className="pdesc">{p.desc}</p>
           <div className="tags">{p.highlights.map(h=><span key={h} className="htag">✓ {h}</span>)}</div>
